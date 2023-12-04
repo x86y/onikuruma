@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include "../../k.h"
+#include <k.h>
 #include <oniguruma.h>
 #include <stdio.h>
 #include <stdlib.h>
