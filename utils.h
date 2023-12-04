@@ -16,6 +16,9 @@ int init_regex(OnigRegex *regex, OnigErrorInfo *einfo, const K pattern, const K 
     (*inp)[NK(str)] = '\0';
     return onig_new(regex, *pattr, *pattr + strlen((char *)*pattr), ONIG_OPTION_DEFAULT, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, einfo);
 }
+#ifndef COMMON_INCLUDE_FILE
+#define COMMON_INCLUDE_FILE
+
 #define INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp) \
     OnigRegex regex; \
     OnigErrorInfo einfo; \
@@ -31,3 +34,4 @@ void cleanup_regex(OnigRegex regex, OnigRegion *region) {
     onig_free(regex);
 }
 
+#endif

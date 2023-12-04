@@ -1,4 +1,4 @@
-#include "utils.c"
+#include "utils.h"
 
 K match(K pattern, K str) {
     INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp)
