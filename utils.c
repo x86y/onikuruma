@@ -1,11 +1,11 @@
-#include "../../a.h"
+#include <stddef.h>
 #include "../../k.h"
 #include "/opt/homebrew/include/oniguruma.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-int init_regex(OnigRegex *regex, OnigErrorInfo *einfo, const A pattern, const A str, UChar **pattr, UChar **inp) {
+int init_regex(OnigRegex *regex, OnigErrorInfo *einfo, const K pattern, const K str, UChar **pattr, UChar **inp) {
     *pattr = malloc(NK(pattern) + 1);
     if (*pattr == NULL) return ONIGERR_MEMORY;
     memcpy(*pattr, (const void *)pattern, NK(pattern));

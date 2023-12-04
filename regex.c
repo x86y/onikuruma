@@ -1,6 +1,6 @@
 #include "utils.c"
 
-A match(A pattern, A str) {
+K match(K pattern, K str) {
     INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp)
     int r = onig_search(regex, inp, inp + strlen((char *)inp), inp, inp + strlen((char *)inp), region, ONIG_OPTION_NONE);
     K result = (r >= 0) ? Ki(region->beg[0]) : -1;
@@ -8,7 +8,7 @@ A match(A pattern, A str) {
     return result;
 }
 
-A indices(A pattern, A str) {
+K indices(K pattern, K str) {
     INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp)
     I *res = NULL; int res_size = 0;
     UChar *start = inp, *end = inp + strlen((char *)inp), *range = end;
@@ -37,42 +37,34 @@ A indices(A pattern, A str) {
     return ret;
 }
 
-A substrings(A pattern, A str) {
+K substrings(K pattern, K str) {
+    kinit();
     INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp)
-    char **substrings = NULL;
-    int substrings_count = 0;
     UChar *start = inp, *end = inp + strlen((char *)inp);
-
+    K result=Kx("()");
     while (start <= end) {
         int r = onig_search(regex, inp, end, start, end, region, ONIG_OPTION_NONE);
         if (r >= 0) {
             for (int i = 1; i < region->num_regs; i++) {
                 int length = region->end[i] - region->beg[i];
-                substrings = realloc(substrings, (substrings_count + 1) * sizeof(char*));
-                substrings[substrings_count] = (char*)malloc((length + 1) * sizeof(char));
-                strncpy(substrings[substrings_count], (const char *)(inp + region->beg[i]), length);
-                substrings[substrings_count][length] = '\0';
-                substrings_count++;
+                char l[length+1];
+                strncpy(l, (const char *)(inp + region->beg[i]), length);
+                l[length] = '\0';
+                result=Kx("{x,,y}",result,KC(l, length));
             }
             start = inp + region->end[0];
         } else if (r == ONIG_MISMATCH) {
             break;
         } else {
-            for (int i = 0; i < substrings_count; i++) free(substrings[i]);
-            free(substrings);
             cleanup_regex(regex, region);
             return Ki(-1);
         }
     }
-
-    K ret = KS(substrings, substrings_count);
-    for (int i = 0; i < substrings_count; i++) free(substrings[i]);
-    free(substrings);
     cleanup_regex(regex, region);
-    return ret;
+    return result;
 }
 
-A replace(A pattern, A str, A replacement) {
+K replace(K pattern, K str, K replacement) {
     INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp)
     int offset = 0, total_len = strlen((char *)inp);
     char *result = malloc(total_len + 1);
