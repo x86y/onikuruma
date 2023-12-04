@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include "../../k.h"
-#include "/opt/homebrew/include/oniguruma.h"
+#include <oniguruma.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
