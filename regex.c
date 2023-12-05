@@ -66,23 +66,29 @@ K substrings(K pattern, K str) {
 
 K replace(K pattern, K str, K replacement) {
     INIT_REGEX(pattern, str, regex, einfo, region, pattr, inp)
-    int offset = 0, total_len = strlen((char *)inp);
-    char *result = malloc(total_len + 1);
-    result[0] = '\0';
+    char *result = malloc(1);
+    result[0] = '\0'; int pos = 0, result_len = 1;
+    char repl[NK(replacement) + 1]; CK(repl, replacement); repl[NK(replacement)] = '\0';
 
-    while (offset < total_len) {
-        int r = onig_search(regex, inp, inp + total_len, inp + offset, inp + total_len, region, ONIG_OPTION_NONE);
+   int r = onig_new(&regex, pattr, pattr + strlen((char *)pattr), ONIG_OPTION_DEFAULT, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
+    if (r != ONIG_NORMAL) return Ki(-1);
+
+    while (pos < strlen((char *)inp)) {
+        r = onig_search(regex, inp, inp + strlen((char *)inp), inp + pos, inp + strlen((char *)inp), region, ONIG_OPTION_NONE);
         if (r >= 0) {
-            strncat(result, (const char *)inp + offset, region->beg[0] - offset);
-            strcat(result, (const char *)replacement);
-            offset = region->end[0];
-            result = realloc(result, strlen(result) + total_len - offset + strlen((char *)replacement) + 1);
+            int pre_match_len = region->beg[0] - pos;
+            result = realloc(result, result_len + pre_match_len + strlen(repl) + 1);
+            strncat(result, (const char *)inp + pos, pre_match_len);
+            strcat(result, repl);
+            pos = region->end[0]; // Move past the matched text
+            result_len += pre_match_len + strlen(repl);
         } else if (r == ONIG_MISMATCH) {
-            strcat(result, (const char *)inp + offset);
+            int remaining_len = strlen((char *)inp) - pos;
+            result = realloc(result, result_len + remaining_len);
+            strcat(result, (const char *)inp + pos);
             break;
         } else {
-            free(result);
-            cleanup_regex(regex, region);
+            free(result); cleanup_regex(regex, region);
             return Ki(-1);
         }
     }
@@ -91,4 +97,5 @@ K replace(K pattern, K str, K replacement) {
     free(result); cleanup_regex(regex, region);
     return ret;
 }
+
 
